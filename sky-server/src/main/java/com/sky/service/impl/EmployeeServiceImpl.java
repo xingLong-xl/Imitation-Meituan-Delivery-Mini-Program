@@ -95,4 +95,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         PageResult pageResult = new PageResult(total,result);
         return pageResult;
     }
+
+    @Override
+    public void startOrStop(Integer status, Long id) {
+        // update employee set status = 0 where id = ?
+        Employee employee  = Employee.builder().status(status).id(id).build();
+        employeeMapper.Update(employee);
+    }
 }
