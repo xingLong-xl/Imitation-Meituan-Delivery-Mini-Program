@@ -11,6 +11,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Mapper
 @Transactional
 public interface DishMapper {
@@ -36,4 +38,5 @@ public interface DishMapper {
 
     @AutoFill(value = OperationType.UPDATE)
     void updateDish(Dish dish);
+    List<Dish> queryByCategoryId(Long categoryId);
 }

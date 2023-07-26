@@ -19,6 +19,6 @@ public interface SetmealMapper {
     Integer countByCategoryId(Long id);
 
     @AutoFill(value = OperationType.INSERT)
-    @Insert("insert into setmeal values (#{id},#{categoryId},#{name},#{price},#{status},#{description},#{image})")
+    @Insert("insert into setmeal values (#{id},#{categoryId},#{name},#{price},#{status},#{description},#{image},#{createTime},#{updateTime},#{createUser},#{updateUser})")
     void insert(Setmeal setmeal);
 }
