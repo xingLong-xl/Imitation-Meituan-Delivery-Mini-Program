@@ -3,6 +3,7 @@ package com.sky.service.impl;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
+import com.sky.constant.RedisKeyConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.CategoryDTO;
@@ -17,6 +18,7 @@ import com.sky.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,7 +29,8 @@ import java.util.List;
 @Service
 @Slf4j
 public class CategoryServiceImpl implements CategoryService {
-
+    @Autowired
+    private RedisTemplate redisTemplate;
     @Autowired
     private CategoryMapper categoryMapper;
     @Autowired
@@ -54,6 +57,8 @@ public class CategoryServiceImpl implements CategoryService {
         //category.setUpdateUser(BaseContext.getCurrentId());
 
         categoryMapper.insert(category);
+        redisTemplate.delete(RedisKeyConstant.KEY + categoryDTO.getId());
+
     }
 
     /**
@@ -89,6 +94,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         //删除分类数据
         categoryMapper.deleteById(id);
+        redisTemplate.delete(RedisKeyConstant.KEY + id);
     }
 
     /**
@@ -104,6 +110,7 @@ public class CategoryServiceImpl implements CategoryService {
         //category.setUpdateUser(BaseContext.getCurrentId());
 
         categoryMapper.update(category);
+        redisTemplate.delete(RedisKeyConstant.KEY + categoryDTO.getId());
     }
 
     /**
@@ -119,6 +126,7 @@ public class CategoryServiceImpl implements CategoryService {
                 //.updateUser(BaseContext.getCurrentId())
                 .build();
         categoryMapper.update(category);
+        redisTemplate.delete(RedisKeyConstant.KEY + id);
     }
 
     /**

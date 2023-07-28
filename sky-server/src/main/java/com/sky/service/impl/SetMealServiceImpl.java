@@ -3,6 +3,7 @@ package com.sky.service.impl;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
+import com.sky.constant.RedisKeyConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
@@ -21,7 +22,7 @@ import com.sky.vo.SetmealVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,8 @@ import java.util.List;
 @Service
 public class SetMealServiceImpl implements SetMealService {
 
+    @Autowired
+    private RedisTemplate redisTemplate;
     @Autowired
     private SetmealMapper setmealMapper;
 
@@ -121,6 +124,7 @@ public class SetMealServiceImpl implements SetMealService {
         });
         //3、重新插入套餐和菜品的关联关系，操作setmeal_dish表，执行insert
         setmealDishMapper.insert(setmealDishes);
+        redisTemplate.opsForValue().getAndDelete(RedisKeyConstant.KEY + setmealDTO.getCategoryId());
     }
     /**
      * 套餐起售、停售

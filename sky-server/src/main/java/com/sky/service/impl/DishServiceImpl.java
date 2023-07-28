@@ -3,6 +3,7 @@ package com.sky.service.impl;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
+import com.sky.constant.RedisKeyConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
@@ -10,7 +11,6 @@ import com.sky.entity.Category;
 import com.sky.entity.Dish;
 import com.sky.entity.DishFlavor;
 import com.sky.exception.DeletionNotAllowedException;
-import com.sky.mapper.CategoryMapper;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
@@ -20,19 +20,21 @@ import com.sky.vo.DishVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @Slf4j
 public class DishServiceImpl implements DishService {
+
     @Autowired
     private DishMapper dishMapper;
     @Autowired
-    private CategoryMapper categoryMapper;
+    private RedisTemplate redisTemplate;
 
     @Autowired
     private SetmealDishMapper setmealDishMapper;
@@ -106,6 +108,7 @@ public class DishServiceImpl implements DishService {
                     dishFlavor.setDishId(dishDTO.getId()));
             dishFlavorMapper.insertBatch(flavors);
         }
+        redisTemplate.delete(RedisKeyConstant.KEY + dishDTO.getCategoryId());
     }
 
     @Override
@@ -113,6 +116,7 @@ public class DishServiceImpl implements DishService {
         Dish dish = dishMapper.getById(id);
         dish.setStatus(status);
         dishMapper.updateDish(dish);
+        redisTemplate.delete(RedisKeyConstant.KEY + dish.getCategoryId());
     }
 
     @Override
@@ -132,9 +136,14 @@ public class DishServiceImpl implements DishService {
      * @return
      */
     public List<DishVO> listWithFlavor(Dish dish) {
-        List<Dish> dishList = dishMapper.queryByCategoryId(dish.getCategoryId());
-
-        List<DishVO> dishVOList = new ArrayList<>();
+        String key = RedisKeyConstant.KEY + dish.getCategoryId();
+        ValueOperations<String, List<DishVO>> valueOperations = redisTemplate.opsForValue();
+        List<DishVO> dishVOList = valueOperations.get(key);
+        if(dishVOList != null && dishVOList.size() > 0){
+            return dishVOList;
+        }
+        List<Dish> dishList = dishMapper.selectEnableDish(dish);
+        dishVOList = new ArrayList<>();
 
         for (Dish d : dishList) {
             DishVO dishVO = new DishVO();
@@ -146,7 +155,7 @@ public class DishServiceImpl implements DishService {
             dishVO.setFlavors(flavors);
             dishVOList.add(dishVO);
         }
-
+        redisTemplate.opsForValue().set(key, dishVOList);
         return dishVOList;
     }
 }
