@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import springfox.documentation.annotations.Cacheable;
 
 import java.util.List;
 
@@ -46,7 +47,7 @@ public class SetMealServiceImpl implements SetMealService {
         BeanUtils.copyProperties(setmealDTO, setmeal);
         setmealMapper.insert(setmeal);
         List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
-        if(setmealDishes != null){
+        if(setmealDishes != null && setmealDishes.size() > 0){
             setmealDishMapper.insert(setmealDishes);
         }
     }
@@ -124,7 +125,7 @@ public class SetMealServiceImpl implements SetMealService {
         });
         //3、重新插入套餐和菜品的关联关系，操作setmeal_dish表，执行insert
         setmealDishMapper.insert(setmealDishes);
-        redisTemplate.opsForValue().getAndDelete(RedisKeyConstant.KEY + setmealDTO.getCategoryId());
+
     }
     /**
      * 套餐起售、停售
@@ -154,6 +155,7 @@ public class SetMealServiceImpl implements SetMealService {
      * @param setmeal
      * @return
      */
+
     public List<Setmeal> list(Setmeal setmeal) {
         List<Setmeal> list = setmealMapper.list(setmeal);
         return list;

@@ -42,7 +42,7 @@ public interface SetmealMapper {
     void deleteById(Long setmealId);
 
     @AutoFill(value = OperationType.UPDATE)
-    @Update("update setmeal set id = #{id}, category_id = #{categoryId}, name = #{name}, price = #{price},status = #{status}, description = #{description},image = #{image},create_time = #{createTime},update_time = #{updateTime},create_user = #{createUser},update_user = #{updateUser}")
+    @Update("update setmeal set category_id = #{categoryId}, name = #{name}, price = #{price},status = #{status}, description = #{description},image = #{image},create_time = #{createTime},update_time = #{updateTime},create_user = #{createUser},update_user = #{updateUser} where id = #{id}")
     void update(Setmeal setmeal);
 
     /**
