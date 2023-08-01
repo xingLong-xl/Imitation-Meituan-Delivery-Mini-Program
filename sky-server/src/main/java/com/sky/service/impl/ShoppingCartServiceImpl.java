@@ -84,7 +84,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
      */
     @Override
     public void deleteAll() {
-        shoppingCartMapper.deleteAll();
+        Long userId = BaseContext.getCurrentId();
+        shoppingCartMapper.deleteAll(userId);
     }
 
 
