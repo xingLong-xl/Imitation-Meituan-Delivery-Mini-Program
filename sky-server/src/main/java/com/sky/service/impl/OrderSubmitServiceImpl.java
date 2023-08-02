@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderSubmitServiceImpl implements OrderSubmitService {
@@ -157,16 +158,14 @@ public class OrderSubmitServiceImpl implements OrderSubmitService {
     public PageResult query(OrdersPageQueryDTO ordersPageQueryDTO) {
         // 开始分页
         PageHelper.startPage(ordersPageQueryDTO.getPage(),ordersPageQueryDTO.getPageSize());
-        // 根据用户id订单
-        Long userId = BaseContext.getCurrentId();
-        Page<OrderAndOrderDetailVO> page = orderMapper.getAll(userId);
+        ordersPageQueryDTO.setUserId(BaseContext.getCurrentId());
+        Page<OrderAndOrderDetailVO> page = orderMapper.getAll(ordersPageQueryDTO);
         long total = page.getTotal();
         List<OrderAndOrderDetailVO> result = page.getResult();
         for (OrderAndOrderDetailVO orders : result) {
             List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders.getId());
             orders.setOrderDetailList(orderDetailList);
         }
-
         PageResult pageResult = new PageResult(total, result);
         return pageResult;
     }
@@ -184,5 +183,40 @@ public class OrderSubmitServiceImpl implements OrderSubmitService {
         BeanUtils.copyProperties(orders, orderAndOrderDetailVO);
         orderAndOrderDetailVO.setOrderDetailList(orderDetailList);
         return orderAndOrderDetailVO;
+    }
+
+    /**
+     * 再来一单
+     * @param orderId
+     */
+    @Override
+    public void repetition(Long orderId) {
+        // 查询当前用户id
+        Long userId = BaseContext.getCurrentId();
+
+        // 根据订单id查询当前订单详情
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orderId);
+
+        // 将订单详情对象转换为购物车对象
+        List<ShoppingCart> shoppingCartList = orderDetailList.stream().map(x -> {
+            ShoppingCart shoppingCart = new ShoppingCart();
+
+            // 将原订单详情里面的菜品信息重新复制到购物车对象中
+            BeanUtils.copyProperties(x, shoppingCart, "id");
+            shoppingCart.setUserId(userId);
+            shoppingCart.setCreateTime(LocalDateTime.now());
+
+            return shoppingCart;
+        }).collect(Collectors.toList());
+
+        // 将购物车对象批量添加到数据库
+        shoppingCartMapper.insertBatch(shoppingCartList);
+    }
+
+    @Override
+    public void cancel(Long id) {
+        Orders order = orderMapper.getById(id);
+        order.setStatus(Orders.CANCELLED);
+        orderMapper.update(order);
     }
 }

@@ -77,5 +77,21 @@ public class OrderCtronller {
         OrderAndOrderDetailVO orderAndOrderDetailVO = orderSubmitService.orderDetail(id);
         return Result.success(orderAndOrderDetailVO);
     }
+
+    @PostMapping("/repetition/{id}")
+    @ApiOperation("再来一单")
+    public Result repetition(@PathVariable Long id){
+        log.info("再来一单：{}", id);
+        orderSubmitService.repetition(id);
+        return Result.success();
+    }
+
+    @PutMapping("/cancel/{id}")
+    @ApiOperation("取消订单")
+    public Result cancel(@PathVariable Long id){
+        log.info("取消订单：{}", id);
+        orderSubmitService.cancel(id);
+        return Result.success();
+    }
 }
 

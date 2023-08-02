@@ -33,4 +33,8 @@ public interface OrderSubmitService {
     PageResult query(OrdersPageQueryDTO ordersPageQueryDTO);
 
     OrderAndOrderDetailVO orderDetail(Long id);
+
+    void repetition(Long id);
+
+    void cancel(Long id);
 }

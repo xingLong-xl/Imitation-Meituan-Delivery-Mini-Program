@@ -12,7 +12,7 @@ sky:
     access-key-secret: 41EslHMW5rfRgYRuH4Em95zI1Ljjpx
     bucket-name: sky-yxl
   redis:
-    host: 192.168.72.145
+    host: 192.168.72.147
     password: 123456
     port: 6379
     database: 10
