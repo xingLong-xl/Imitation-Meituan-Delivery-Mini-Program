@@ -7,7 +7,6 @@ import com.sky.constant.RedisKeyConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
-import com.sky.entity.Category;
 import com.sky.entity.Dish;
 import com.sky.entity.DishFlavor;
 import com.sky.exception.DeletionNotAllowedException;
@@ -17,9 +16,11 @@ import com.sky.mapper.SetmealDishMapper;
 import com.sky.result.PageResult;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
+import io.netty.channel.ConnectTimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
@@ -136,15 +137,20 @@ public class DishServiceImpl implements DishService {
      * @return
      */
     public List<DishVO> listWithFlavor(Dish dish) {
-        String key = RedisKeyConstant.KEY + dish.getCategoryId();
-        ValueOperations<String, List<DishVO>> valueOperations = redisTemplate.opsForValue();
-        List<DishVO> dishVOList = valueOperations.get(key);
-        if(dishVOList != null && dishVOList.size() > 0){
-            return dishVOList;
-        }
-        List<Dish> dishList = dishMapper.selectEnableDish(dish);
-        dishVOList = new ArrayList<>();
+        try {
+            String key = RedisKeyConstant.KEY + dish.getCategoryId();
+            ValueOperations<String, List<DishVO>> valueOperations = redisTemplate.opsForValue();
+            List<DishVO> dishVOList = valueOperations.get(key);
+            if(dishVOList != null && dishVOList.size() > 0) {
+                return dishVOList;
+            }
+        } catch (RedisConnectionFailureException e) {
 
+        }
+
+        String key = RedisKeyConstant.KEY + dish.getCategoryId();
+        List<Dish> dishList = dishMapper.selectEnableDish(dish);
+        List<DishVO> dishVOList = new ArrayList<>();
         for (Dish d : dishList) {
             DishVO dishVO = new DishVO();
             BeanUtils.copyProperties(d,dishVO);

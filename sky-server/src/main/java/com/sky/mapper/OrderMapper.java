@@ -1,8 +1,12 @@
 package com.sky.mapper;
 
+import com.github.pagehelper.Page;
 import com.sky.entity.Orders;
+import com.sky.vo.OrderAndOrderDetailVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 @Mapper
 public interface OrderMapper {
@@ -24,4 +28,12 @@ public interface OrderMapper {
      * @param orders
      */
     void update(Orders orders);
+
+    /**
+     * 历史订单查询
+     * @param userId
+     * @return
+     */
+    @Select("select * from orders where user_id = #{userId}")
+    Page<OrderAndOrderDetailVO> getAll(Long userId);
 }

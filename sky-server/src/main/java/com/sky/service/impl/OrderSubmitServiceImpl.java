@@ -1,16 +1,21 @@
 package com.sky.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
 import com.sky.mapper.*;
+import com.sky.result.PageResult;
 import com.sky.service.OrderSubmitService;
 import com.sky.utils.WeChatPayUtil;
+import com.sky.vo.OrderAndOrderDetailVO;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 import org.springframework.beans.BeanUtils;
@@ -141,6 +146,29 @@ public class OrderSubmitServiceImpl implements OrderSubmitService {
                 .build();
 
         orderMapper.update(orders);
+    }
+
+    /**
+     * 历史订单查询
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult query(OrdersPageQueryDTO ordersPageQueryDTO) {
+        // 开始分页
+        PageHelper.startPage(ordersPageQueryDTO.getPage(),ordersPageQueryDTO.getPageSize());
+        // 根据用户id订单
+        Long userId = BaseContext.getCurrentId();
+        Page<OrderAndOrderDetailVO> page = orderMapper.getAll(userId);
+        long total = page.getTotal();
+        List<OrderAndOrderDetailVO> result = page.getResult();
+        for (OrderAndOrderDetailVO orders : result) {
+            List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders.getId());
+            orders.setOrderDetailList(orderDetailList);
+        }
+
+        PageResult pageResult = new PageResult(total, result);
+        return pageResult;
     }
 
 }
