@@ -4,6 +4,7 @@ import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.result.PageResult;
+import com.sky.vo.OrderAndOrderDetailVO;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 
@@ -31,4 +32,5 @@ public interface OrderSubmitService {
 
     PageResult query(OrdersPageQueryDTO ordersPageQueryDTO);
 
+    OrderAndOrderDetailVO orderDetail(Long id);
 }

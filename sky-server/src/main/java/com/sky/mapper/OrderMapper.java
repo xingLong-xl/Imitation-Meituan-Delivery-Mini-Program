@@ -36,4 +36,7 @@ public interface OrderMapper {
      */
     @Select("select * from orders where user_id = #{userId}")
     Page<OrderAndOrderDetailVO> getAll(Long userId);
+
+    @Select("select * from orders where id = #{id}")
+    Orders getById(Long id);
 }
