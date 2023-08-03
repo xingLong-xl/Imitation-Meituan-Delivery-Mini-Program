@@ -12,10 +12,15 @@ sky:
     access-key-secret: 41EslHMW5rfRgYRuH4Em95zI1Ljjpx
     bucket-name: sky-yxl
   redis:
-    host: 192.168.72.147
+    host: 192.168.72.149
     password: 123456
     port: 6379
     database: 10
   wechat:
     appid: wxa5807f817bd29a8e
     secret: 86a86f3eddc7653b6c72ab0f58909577
+  shop:
+    address: 北京市海淀区上地十街10号
+  baidu:
+    ak: AQfu8sXx5eoZqD6AynvEEuUeQoiqzFMO
+
